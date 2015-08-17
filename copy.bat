@@ -1,4 +1,4 @@
-set file="next.png"
+set file="widget_previous.png"
 set frompath="d:\mine\programming\androidStudio\vanilla\res"
 set topath="d:\mine\programming\androidStudio\jidae\app\src\main\res"
 copy %frompath%\drawable-hdpi\%file% %topath%\drawable-hdpi

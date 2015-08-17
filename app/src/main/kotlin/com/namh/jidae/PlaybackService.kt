@@ -59,6 +59,7 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.RemoteViews
 import android.widget.Toast
+import com.namh.jidae.ui.MiniPlaybackActivity
 import com.namh.jidae.ui.PlaybackActivity
 
 import java.io.DataInputStream
@@ -122,7 +123,35 @@ public class PlaybackService : Service(),
     private var mErrorMessage: String? = null
 
 
+    //---------------------------------------------------------------------------- Notification
+    /**
+     * If true, the notification should not be hidden when pausing regardless
+     * of user settings.
+     */
+    private var mForceNotificationVisible: Boolean = false
+    /**
+     * Behaviour of the notification
+     */
+    private var mNotificationMode: Int = 0
 
+    private var mNotificationManager: NotificationManager? = null
+
+    public val NEVER: Int = 0
+    public val WHEN_PLAYING: Int = 1
+    public val ALWAYS: Int = 2
+
+    private val NOTIFICATION_ID = 2
+
+    /**
+     * The intent for the notification to execute, created by
+     * [PlaybackService.createNotificationAction].
+     */
+    private var mNotificationAction: PendingIntent? = null
+
+    /**
+     * If true, create a notification with ticker text or heads up display
+     */
+    private var mNotificationNag: Boolean = false
 
 
 
@@ -140,76 +169,7 @@ public class PlaybackService : Service(),
 
 
 
-    //-------------------------------------------------------------------------------- Action
 
-    /**
-     * Action for startService: toggle playback on/off.
-     */
-    public val ACTION_TOGGLE_PLAYBACK: String = "com.namh.jidae.action.TOGGLE_PLAYBACK"
-    /**
-     * Action for startService: start playback if paused.
-     */
-    public val ACTION_PLAY: String = "com.namh.jidae.action.PLAY"
-    /**
-     * Action for startService: pause playback if playing.
-     */
-    public val ACTION_PAUSE: String = "com.namh.jidae.action.PAUSE"
-    /**
-     * Action for startService: toggle playback on/off.
-
-     * Unlike [PlaybackService.ACTION_TOGGLE_PLAYBACK], the toggle does
-     * not occur immediately. Instead, it is delayed so that if two of these
-     * actions are received within 400 ms, the playback activity is opened
-     * instead.
-     */
-    public val ACTION_TOGGLE_PLAYBACK_DELAYED: String = "com.namh.jidae.action.TOGGLE_PLAYBACK_DELAYED"
-    /**
-     * Action for startService: toggle playback on/off.
-
-     * This works the same way as ACTION_PLAY_PAUSE but prevents the notification
-     * from being hidden regardless of notification visibility settings.
-     */
-    public val ACTION_TOGGLE_PLAYBACK_NOTIFICATION: String = "com.namh.jidae.action.TOGGLE_PLAYBACK_NOTIFICATION"
-    /**
-     * Action for startService: advance to the next song.
-     */
-    public val ACTION_NEXT_SONG: String = "com.namh.jidae.action.NEXT_SONG"
-    /**
-     * Action for startService: advance to the next song.
-
-     * Unlike [PlaybackService.ACTION_NEXT_SONG], the toggle does
-     * not occur immediately. Instead, it is delayed so that if two of these
-     * actions are received within 400 ms, the playback activity is opened
-     * instead.
-     */
-    public val ACTION_NEXT_SONG_DELAYED: String = "com.namh.jidae.action.NEXT_SONG_DELAYED"
-    /**
-     * Action for startService: advance to the next song.
-
-     * Like ACTION_NEXT_SONG, but starts playing automatically if paused
-     * when this is called.
-     */
-    public val ACTION_NEXT_SONG_AUTOPLAY: String = "com.namh.jidae.action.NEXT_SONG_AUTOPLAY"
-    /**
-     * Action for startService: go back to the previous song.
-     */
-    public val ACTION_PREVIOUS_SONG: String = "com.namh.jidae.action.PREVIOUS_SONG"
-    /**
-     * Action for startService: go back to the previous song OR just rewind if it played for less than 5 seconds
-     */
-    public val ACTION_REWIND_SONG: String = "com.namh.jidae.action.REWIND_SONG"
-    /**
-     * Change the shuffle mode.
-     */
-    public val ACTION_CYCLE_SHUFFLE: String = "com.namh.jidae.CYCLE_SHUFFLE"
-    /**
-     * Change the repeat mode.
-     */
-    public val ACTION_CYCLE_REPEAT: String = "com.namh.jidae.CYCLE_REPEAT"
-    /**
-     * Pause music and hide the notifcation.
-     */
-    public val ACTION_CLOSE_NOTIFICATION: String = "com.namh.jidae.CLOSE_NOTIFICATION"
 
 
 
@@ -248,6 +208,16 @@ public class PlaybackService : Service(),
         // We only have a single audio session
         mPreparedMediaPlayer!!.setAudioSessionId(mMediaPlayer!!.getAudioSessionId())
 
+
+        // Notification
+        mNotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+//        mNotificationAction = createNotificationAction(settings)
+        mNotificationAction = createNotificationAction()
+
+//        mNotificationMode = Integer.parseInt(settings.getString(PrefKeys.NOTIFICATION_MODE, "1"))
+//        mNotificationNag = settings.getBoolean(PrefKeys.NOTIFICATION_NAG, false)
+        mNotificationMode = 1
+        mNotificationNag = false
 
 
         mLooper = thread.getLooper()
@@ -403,6 +373,52 @@ public class PlaybackService : Service(),
 
 
 
+
+    public fun createNotificationAction(): PendingIntent {
+        val intent = Intent(this, javaClass<MiniPlaybackActivity>())
+        return PendingIntent.getActivity(this, 0, intent, 0)
+    }
+    /**
+     * Create a PendingIntent for use with the notification.
+
+     * @param prefs Where to load the action preference from.
+     */
+    public fun createNotificationAction(prefs: SharedPreferences): PendingIntent {
+        val intent = Intent(this, javaClass<MiniPlaybackActivity>())
+        return PendingIntent.getActivity(this, 0, intent, 0)
+
+//        when (Integer.parseInt(prefs.getString(PrefKeys.NOTIFICATION_ACTION, "0"))) {
+//            NOT_ACTION_NEXT_SONG -> {
+//                val intent = Intent(this, javaClass<PlaybackService>())
+//                intent.setAction(PlaybackService.ACTION_NEXT_SONG_AUTOPLAY)
+//                return PendingIntent.getService(this, 0, intent, 0)
+//            }
+//            NOT_ACTION_MINI_ACTIVITY -> {
+//                val intent = Intent(this, javaClass<MiniPlaybackActivity>())
+//                return PendingIntent.getActivity(this, 0, intent, 0)
+//            }
+//            else -> {
+//                Log.w("VanillaMusic", "Unknown value for notification_action. Defaulting to 0.")
+//                run {
+//                    val intent = Intent(this, javaClass<LibraryActivity>())
+//                    intent.setAction(Intent.ACTION_MAIN)
+//                    return PendingIntent.getActivity(this, 0, intent, 0)
+//                }
+//            }
+//        // fall through
+//            NOT_ACTION_MAIN_ACTIVITY -> {
+//                val intent = Intent(this, javaClass<LibraryActivity>())
+//                intent.setAction(Intent.ACTION_MAIN)
+//                return PendingIntent.getActivity(this, 0, intent, 0)
+//            }
+//            NOT_ACTION_FULL_ACTIVITY -> {
+//                val intent = Intent(this, javaClass<FullPlaybackActivity>())
+//                intent.setAction(Intent.ACTION_MAIN)
+//                return PendingIntent.getActivity(this, 0, intent, 0)
+//            }
+//        }
+    }
+
     /**
      * Move to the next or previous song or album in the timeline.
 
@@ -518,6 +534,107 @@ public class PlaybackService : Service(),
         }
     }
 
+
+    /**
+     * Create a song notification. Call through the NotificationManager to
+     * display it.
+
+     * @param song The Song to display information about.
+     * *
+     * @param state The state. Determines whether to show paused or playing icon.
+     */
+    public fun createNotification(song: Song?, state: Int): Notification {
+        val playing = (state and FLAG_PLAYING) != 0
+
+        val views = RemoteViews(getPackageName(), R.layout.notification)
+        val expanded = RemoteViews(getPackageName(), R.layout.notification_expanded)
+
+        val cover = song!!.getCover(this)
+        if (cover == null) {
+            views.setImageViewResource(R.id.cover, R.drawable.fallback_cover)
+            expanded.setImageViewResource(R.id.cover, R.drawable.fallback_cover)
+        } else {
+            views.setImageViewBitmap(R.id.cover, cover)
+            expanded.setImageViewBitmap(R.id.cover, cover)
+        }
+
+        //val playButton = ThemeHelper.getPlayButtonResource(playing)
+        val playButton = getPlayButtonResource(playing)
+
+        views.setImageViewResource(R.id.play_pause, playButton)
+        expanded.setImageViewResource(R.id.play_pause, playButton)
+
+        val service = ComponentName(this, javaClass<PlaybackService>())
+
+        val previous = Intent(PlaybackService.ACTION_PREVIOUS_SONG)
+        previous.setComponent(service)
+        expanded.setOnClickPendingIntent(R.id.previous, PendingIntent.getService(this, 0, previous, 0))
+
+        val playPause = Intent(PlaybackService.ACTION_TOGGLE_PLAYBACK_NOTIFICATION)
+        playPause.setComponent(service)
+        views.setOnClickPendingIntent(R.id.play_pause, PendingIntent.getService(this, 0, playPause, 0))
+        expanded.setOnClickPendingIntent(R.id.play_pause, PendingIntent.getService(this, 0, playPause, 0))
+
+        val next = Intent(PlaybackService.ACTION_NEXT_SONG)
+        next.setComponent(service)
+        views.setOnClickPendingIntent(R.id.next, PendingIntent.getService(this, 0, next, 0))
+        expanded.setOnClickPendingIntent(R.id.next, PendingIntent.getService(this, 0, next, 0))
+
+        val close = Intent(PlaybackService.ACTION_CLOSE_NOTIFICATION)
+        close.setComponent(service)
+        views.setOnClickPendingIntent(R.id.close, PendingIntent.getService(this, 0, close, 0))
+        expanded.setOnClickPendingIntent(R.id.close, PendingIntent.getService(this, 0, close, 0))
+
+        views.setTextViewText(R.id.title, song!!.title)
+        views.setTextViewText(R.id.artist, song!!.artist)
+        expanded.setTextViewText(R.id.title, song!!.title)
+        expanded.setTextViewText(R.id.album, song!!.album)
+        expanded.setTextViewText(R.id.artist, song!!.artist)
+
+        val notification = Notification()
+        notification.contentView = views
+        notification.icon = R.drawable.status_icon
+        notification.flags = notification.flags or Notification.FLAG_ONGOING_EVENT
+        notification.contentIntent = mNotificationAction
+        if (isOnVersionOrNewer(16)) {   // Jellybean : 16
+            // expanded view is available since 4.1
+            notification.bigContentView = expanded
+        }
+        if (lollipopOrNewer()) {
+            notification.visibility = Notification.VISIBILITY_PUBLIC
+        }
+
+        if (mNotificationNag) {
+            if (lollipopOrNewer()) {
+                notification.priority = Notification.PRIORITY_MAX
+                notification.vibrate = LongArray(0) // needed to get headsup
+            } else {
+                notification.tickerText = song!!.title + " - " + song!!.artist
+            }
+        }
+
+        return notification
+    }
+
+    private fun getPlayButtonResource(playing: Boolean): Int {
+        var playButton = 0
+
+        if (lollipopOrNewer()) {
+            // Android >= 5.0 uses the dark version of this drawable
+            playButton = if (playing) R.drawable.widget_pause else R.drawable.widget_play
+        } else {
+            playButton = if (playing) R.drawable.pause else R.drawable.play
+        }
+        return playButton
+    }
+
+    private fun updateNotification() {
+        if ((mForceNotificationVisible || mNotificationMode == ALWAYS || mNotificationMode == WHEN_PLAYING && (mState and FLAG_PLAYING) != 0) && mCurrentSong != null)
+            mNotificationManager!!.notify(NOTIFICATION_ID, createNotification(mCurrentSong, mState))
+        else
+            mNotificationManager!!.cancel(NOTIFICATION_ID)
+    }
+
     /**
      * Start playing if currently paused.
 
@@ -599,9 +716,9 @@ public class PlaybackService : Service(),
                 if (mMediaPlayerInitialized)
                     mMediaPlayer?.start()
 
-//                if (mNotificationMode != NEVER)
-//                // player on notification bar
-//                    startForeground(NOTIFICATION_ID, createNotification(mCurrentSong, mState))
+
+                if (mNotificationMode != NEVER) // player on notification bar
+                    startForeground(NOTIFICATION_ID, createNotification(mCurrentSong, mState))
 
                 // for unplugging the headset
 //                mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
@@ -618,12 +735,12 @@ public class PlaybackService : Service(),
                 if (mMediaPlayerInitialized)
                     mMediaPlayer?.pause()
 
-//                if (mNotificationMode == ALWAYS || mForceNotificationVisible) {
-//                    stopForeground(false)
-//                    mNotificationManager.notify(NOTIFICATION_ID, createNotification(mCurrentSong, mState))
-//                } else {
+                if (mNotificationMode == ALWAYS || mForceNotificationVisible) {
+                    stopForeground(false)
+                    mNotificationManager!!.notify(NOTIFICATION_ID, createNotification(mCurrentSong, mState))
+                } else {
                     stopForeground(true)
-//                }
+                }
 
                 // Delay entering deep sleep. This allows the headset
                 // button to continue to function for a short period after
@@ -720,7 +837,77 @@ public class PlaybackService : Service(),
         public val FLAG_EMPTY_QUEUE: Int = 8
 
 
+        //-------------------------------------------------------------------------------- Action
 
+
+        /**
+         * Action for startService: toggle playback on/off.
+         */
+        public val ACTION_TOGGLE_PLAYBACK: String = "com.namh.jidae.action.TOGGLE_PLAYBACK"
+        /**
+         * Action for startService: start playback if paused.
+         */
+        public val ACTION_PLAY: String = "com.namh.jidae.action.PLAY"
+        /**
+         * Action for startService: pause playback if playing.
+         */
+        public val ACTION_PAUSE: String = "com.namh.jidae.action.PAUSE"
+        /**
+         * Action for startService: toggle playback on/off.
+
+         * Unlike [PlaybackService.ACTION_TOGGLE_PLAYBACK], the toggle does
+         * not occur immediately. Instead, it is delayed so that if two of these
+         * actions are received within 400 ms, the playback activity is opened
+         * instead.
+         */
+        public val ACTION_TOGGLE_PLAYBACK_DELAYED: String = "com.namh.jidae.action.TOGGLE_PLAYBACK_DELAYED"
+        /**
+         * Action for startService: toggle playback on/off.
+
+         * This works the same way as ACTION_PLAY_PAUSE but prevents the notification
+         * from being hidden regardless of notification visibility settings.
+         */
+        public val ACTION_TOGGLE_PLAYBACK_NOTIFICATION: String = "com.namh.jidae.action.TOGGLE_PLAYBACK_NOTIFICATION"
+        /**
+         * Action for startService: advance to the next song.
+         */
+        public val ACTION_NEXT_SONG: String = "com.namh.jidae.action.NEXT_SONG"
+        /**
+         * Action for startService: advance to the next song.
+
+         * Unlike [PlaybackService.ACTION_NEXT_SONG], the toggle does
+         * not occur immediately. Instead, it is delayed so that if two of these
+         * actions are received within 400 ms, the playback activity is opened
+         * instead.
+         */
+        public val ACTION_NEXT_SONG_DELAYED: String = "com.namh.jidae.action.NEXT_SONG_DELAYED"
+        /**
+         * Action for startService: advance to the next song.
+
+         * Like ACTION_NEXT_SONG, but starts playing automatically if paused
+         * when this is called.
+         */
+        public val ACTION_NEXT_SONG_AUTOPLAY: String = "com.namh.jidae.action.NEXT_SONG_AUTOPLAY"
+        /**
+         * Action for startService: go back to the previous song.
+         */
+        public val ACTION_PREVIOUS_SONG: String = "com.namh.jidae.action.PREVIOUS_SONG"
+        /**
+         * Action for startService: go back to the previous song OR just rewind if it played for less than 5 seconds
+         */
+        public val ACTION_REWIND_SONG: String = "com.namh.jidae.action.REWIND_SONG"
+        /**
+         * Change the shuffle mode.
+         */
+        public val ACTION_CYCLE_SHUFFLE: String = "com.namh.jidae.CYCLE_SHUFFLE"
+        /**
+         * Change the repeat mode.
+         */
+        public val ACTION_CYCLE_REPEAT: String = "com.namh.jidae.CYCLE_REPEAT"
+        /**
+         * Pause music and hide the notifcation.
+         */
+        public val ACTION_CLOSE_NOTIFICATION: String = "com.namh.jidae.CLOSE_NOTIFICATION"
 
 
 
@@ -842,11 +1029,12 @@ public class PlaybackService : Service(),
 
         }
 
-
-//         updateNotification()
+        updateNotification()
 //
 //        mTimeline!!.purge()
     }
+
+
 
     //-------------------------------------------------------------------- Handler.Callback
     /**
