@@ -247,8 +247,25 @@ public class PlaybackService : Service(),
             } else if (ACTION_PAUSE == action) {
                 pause()
 
+            } else if (ACTION_TOGGLE_PLAYBACK_NOTIFICATION == action) {
+                mForceNotificationVisible = true
+                synchronized (mStateLock) {
+                    if ((mState and FLAG_PLAYING) != 0)
+                        pause()
+                    else
+                        play()
+                }
+            } else if (ACTION_TOGGLE_PLAYBACK_DELAYED == action) {
+//                if (mHandler!!.hasMessages(CALL_GO, Integer.valueOf(0))) {
+//                    mHandler!!.removeMessages(CALL_GO, Integer.valueOf(0))
+//                    val launch = Intent(this, javaClass<LibraryActivity>())
+//                    launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                    launch.setAction(Intent.ACTION_MAIN)
+//                    startActivity(launch)
+//                } else {
+//                    mHandler!!.sendMessageDelayed(mHandler!!.obtainMessage(CALL_GO, 0, 0, Integer.valueOf(0)), 400)
+//                }
             }
-
 
         }
 
