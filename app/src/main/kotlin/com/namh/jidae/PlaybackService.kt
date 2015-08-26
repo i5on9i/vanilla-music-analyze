@@ -1064,6 +1064,20 @@ public class PlaybackService : Service(),
     }
 
 
+    /**
+     * Seek to a position in the current song.
+
+     * @param progress Proportion of song completed (where 1000 is the end of the song)
+     */
+    public fun seekToProgress(progress: Int) {
+        if (!mMediaPlayerInitialized)
+            return
+        val position = mMediaPlayer!!.getDuration() * progress / 1000
+        mMediaPlayer!!.seekTo(position)
+    }
+
+
+
     //-------------------------------------------------------------------- Handler.Callback
     /**
      * Releases mWakeLock and closes any open AudioFx sessions

@@ -315,27 +315,7 @@ public abstract class PlaybackActivity : Activity(),
     public fun onTimelineChanged() {
     }
 
-    /**
-     * Update seek bar progress and schedule another update in one second
-     */
-    private fun updateElapsedTime() {
-        val position
-                = (if (PlaybackService.hasInstance()) PlaybackService.get(this)!!.getPosition() else 0).toLong()
 
-//        if (!mSeekBarTracking) {
-//            val duration = mDuration
-//            mSeekBar.setProgress(if (duration == 0) 0 else (1000 * position / duration).toInt())
-//        }
-//
-//        mElapsedView.setText(DateUtils.formatElapsedTime(mTimeBuilder, position / 1000))
-//
-//        if (!mPaused && mControlsVisible && (mState and PlaybackService.FLAG_PLAYING) !== 0) {
-//            // Try to update right after the duration increases by one second
-//            val next = 1050 - position % 1000
-//            mUiHandler.removeMessages(MSG_UPDATE_PROGRESS)
-//            mUiHandler.sendEmptyMessageDelayed(MSG_UPDATE_PROGRESS, next)
-//        }
-    }
 
 
     override fun handleMessage(message: Message): Boolean {
