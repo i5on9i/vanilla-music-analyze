@@ -510,9 +510,10 @@ public class PlaybackService : Service(),
         song.album = "Download";
         song.title = "liveeco-0420-1-8363"
         song.path = "/mnt/sdcard/Download/liveeco-0420-1-8363.mp3"
+        song.duration = 2806000
 //        song.title = "success-hunch"
 //        song.path = "/mnt/sdcard/Download/successhunch/successhunch-2015-07-08-000.mp3"
-        song.duration = 4204000
+//        song.duration = 4204000
 
 
         return song

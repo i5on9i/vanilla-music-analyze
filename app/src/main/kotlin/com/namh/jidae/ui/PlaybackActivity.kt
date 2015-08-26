@@ -206,7 +206,7 @@ public abstract class PlaybackActivity : Activity(),
      * *
      * @param toggled The flags that have changed from the previous state
      */
-    protected fun onStateChange(state: Int, toggled: Int) {
+    protected open fun onStateChange(state: Int, toggled: Int) {
         if ((toggled and PlaybackService.FLAG_PLAYING) != 0 && mPlayPauseButton != null) {
             mPlayPauseButton!!.setImageResource(if ((state and PlaybackService.FLAG_PLAYING) == 0) R.drawable.play else R.drawable.pause)
         }
@@ -255,7 +255,7 @@ public abstract class PlaybackActivity : Activity(),
 
      * @param song The new song
      */
-    protected fun onSongChange(song: Song?) {
+    protected open fun onSongChange(song: Song?) {
         if (mCoverView != null)
             mCoverView!!.querySongs(PlaybackService.get(this))
     }
