@@ -37,6 +37,7 @@ import android.os.Message
 import android.os.Process
 import android.os.SystemClock
 import android.support.v7.app.AppCompatActivity
+import android.text.format.DateUtils
 import android.view.ContextMenu
 import android.view.KeyEvent
 import android.view.Menu
@@ -44,8 +45,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.widget.ImageButton
-import android.widget.Toast
+import android.widget.*
 import com.namh.jidae.*
 
 import java.io.File
@@ -83,6 +83,15 @@ public abstract class PlaybackActivity : Activity(),
     private var mLastStateEvent: Long = 0
     private var mLastSongEvent: Long = 0
 
+
+
+    protected var mSeekBar: SeekBar? = null
+    protected var mInfoTable: TableLayout? = null
+    protected var mElapsedView: TextView? = null
+    protected var mDurationView: TextView? = null
+
+
+
     override fun onCreate(state: Bundle?) {
         super<Activity>.onCreate(state)
 
@@ -95,6 +104,9 @@ public abstract class PlaybackActivity : Activity(),
 
         mLooper = thread.getLooper()
         mHandler = Handler(mLooper, this)
+
+
+
     }
 
     override fun onDestroy() {
@@ -302,6 +314,29 @@ public abstract class PlaybackActivity : Activity(),
      */
     public fun onTimelineChanged() {
     }
+
+    /**
+     * Update seek bar progress and schedule another update in one second
+     */
+    private fun updateElapsedTime() {
+        val position
+                = (if (PlaybackService.hasInstance()) PlaybackService.get(this)!!.getPosition() else 0).toLong()
+
+//        if (!mSeekBarTracking) {
+//            val duration = mDuration
+//            mSeekBar.setProgress(if (duration == 0) 0 else (1000 * position / duration).toInt())
+//        }
+//
+//        mElapsedView.setText(DateUtils.formatElapsedTime(mTimeBuilder, position / 1000))
+//
+//        if (!mPaused && mControlsVisible && (mState and PlaybackService.FLAG_PLAYING) !== 0) {
+//            // Try to update right after the duration increases by one second
+//            val next = 1050 - position % 1000
+//            mUiHandler.removeMessages(MSG_UPDATE_PROGRESS)
+//            mUiHandler.sendEmptyMessageDelayed(MSG_UPDATE_PROGRESS, next)
+//        }
+    }
+
 
     override fun handleMessage(message: Message): Boolean {
         when (message.what) {
@@ -522,7 +557,17 @@ public abstract class PlaybackActivity : Activity(),
 
         protected val MSG_DELETE: Int = 3
 
+
+
+
         private val GROUP_SHUFFLE = 100
         private val GROUP_FINISH = 101
+
+
+        /**
+         * Update the seekbar progress with the current song progress. This must be
+         * called on the UI Handler.
+         */
+        private val MSG_UPDATE_PROGRESS = 10
     }
 }

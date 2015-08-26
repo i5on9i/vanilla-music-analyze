@@ -27,6 +27,9 @@ import android.os.Bundle
 import android.view.View
 import android.view.Window
 import android.widget.ImageButton
+import android.widget.SeekBar
+import android.widget.TableLayout
+import android.widget.TextView
 import com.namh.jidae.R
 
 /**
@@ -35,6 +38,8 @@ import com.namh.jidae.R
  * CoverView and control buttons.
  */
 public class MiniPlaybackActivity : PlaybackActivity() {
+
+
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
 
@@ -58,6 +63,11 @@ public class MiniPlaybackActivity : PlaybackActivity() {
         mEndButton = findViewById(R.id.end_action) as ImageButton
         mEndButton!!.setOnClickListener(this)
         registerForContextMenu(mEndButton)
+
+
+        mElapsedView = findViewById(R.id.elapsed) as TextView
+        mDurationView = findViewById(R.id.duration) as TextView
+        mSeekBar = findViewById(R.id.seek_bar) as SeekBar
     }
 
     override fun onClick(view: View) {

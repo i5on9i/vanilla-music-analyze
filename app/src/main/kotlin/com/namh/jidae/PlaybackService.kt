@@ -510,7 +510,9 @@ public class PlaybackService : Service(),
         song.album = "Download";
         song.title = "liveeco-0420-1-8363"
         song.path = "/mnt/sdcard/Download/liveeco-0420-1-8363.mp3"
-        song.duration = 2806464
+//        song.title = "success-hunch"
+//        song.path = "/mnt/sdcard/Download/successhunch/successhunch-2015-07-08-000.mp3"
+        song.duration = 4204000
 
 
         return song
@@ -1036,13 +1038,13 @@ public class PlaybackService : Service(),
 
             /* Automatically advance to next song IF we are currently playing or already did skip something
 			 * This will stop after skipping 10 songs to avoid endless loops (queue full of broken stuff */
-            if (mTimeline!!.isEndOfQueue() === false
-                    && getSong(1) != null
-                    && (playing || (mSkipBroken > 0 && mSkipBroken < 10))) {
-                mSkipBroken++
-                mHandler!!.sendMessageDelayed(
-                        mHandler!!.obtainMessage(SKIP_BROKEN_SONG, getTimelinePosition(), 0), 1000)
-            }
+//            if (mTimeline!!.isEndOfQueue() === false
+//                    && getSong(1) != null
+//                    && (playing || (mSkipBroken > 0 && mSkipBroken < 10))) {
+//                mSkipBroken++
+//                mHandler!!.sendMessageDelayed(
+//                        mHandler!!.obtainMessage(SKIP_BROKEN_SONG, getTimelinePosition(), 0), 1000)
+//            }
 
         }
 
@@ -1051,6 +1053,15 @@ public class PlaybackService : Service(),
 //        mTimeline!!.purge()
     }
 
+
+    /**
+     * Returns the current position in current song in milliseconds.
+     */
+    public fun getPosition(): Int {
+        if (!mMediaPlayerInitialized)
+            return 0
+        return mMediaPlayer!!.getCurrentPosition()
+    }
 
 
     //-------------------------------------------------------------------- Handler.Callback
