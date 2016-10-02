@@ -18,7 +18,29 @@
 */
 -->
 <resources>
+    <color name="primary">#03A9F4</color>
+    <color name="primary_dark">#0288D1</color>
+    <color name="primary_light">#B3E5FC</color>
+    <color name="accent">#03A9F4</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#727272</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#B6B6B6</color>
+
+    <color name="primaryColor">@color/primary</color>
+    <color name="darkPrimaryColor">@color/primary_dark</color>
+    <color name="lightPrimaryColor">@color/primary_light</color>
+    <color name="accentColor">@color/accent</color>
+    <color name="textPrimaryColor">@color/primary_text</color>
+    <color name="secondaryTextColor">@color/secondary_text</color>
+    <color name="dividerColor">@color/divider</color>
+    <color name="statusBarColor">@color/darkPrimaryColor</color>
+
+
     <!-- now-playing screen buttons tint -->
     <color name="controls_active">@android:color/holo_blue_dark</color>
     <color name="controls_normal">#fff5f5f5</color>
+
+    <color name="tab_background">@color/primaryColor</color>
+
 </resources>

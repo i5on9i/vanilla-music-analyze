@@ -3,4 +3,13 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+
+    <!-- Nav Drawer Menu Items -->
+    <string name="menu_1">Menu 1</string>
+    <string name="menu_2">Menu 2</string>
+    <string-array name="nav_drawer_items">
+        <item >@string/menu_1</item>
+        <item >@string/menu_2</item>
+    </string-array>
 </resources>

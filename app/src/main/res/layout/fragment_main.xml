@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frag_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+
+
+    <!--@see https://developer.android.com/training/material/lists-cards.html#RecyclerView-->
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_podlist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!--REMOVE_PAGERSLIDINGTABSTRIP-->
+    <!--<com.astuetz.PagerSlidingTabStrip-->
+        <!--android:id="@+id/tabs"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="48dip"-->
+        <!--app:pstsIndicatorColor="@color/tab_indicator"-->
+        <!--app:pstsUnderlineColor="@color/tab_underline"-->
+
+        <!--android:background="@color/tab_background" />-->
+
+
+    <!--replace with ads later-->
+    <LinearLayout
+        android:id="@+id/colors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal" >
+
+        <!--ca-app-pub-3940256099942544/6300978111-->
+        <com.google.android.gms.ads.AdView
+            xmlns:ads="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/adView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            ads:adUnitId="ca-app-pub-9218636137844231/5757716746"
+            ads:adSize="BANNER"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

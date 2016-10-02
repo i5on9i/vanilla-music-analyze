@@ -256,20 +256,45 @@ public class PlaybackService : Service(),
                         play()
                 }
             } else if (ACTION_TOGGLE_PLAYBACK_DELAYED == action) {
-//                if (mHandler!!.hasMessages(CALL_GO, Integer.valueOf(0))) {
-//                    mHandler!!.removeMessages(CALL_GO, Integer.valueOf(0))
-//                    val launch = Intent(this, javaClass<LibraryActivity>())
-//                    launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    launch.setAction(Intent.ACTION_MAIN)
-//                    startActivity(launch)
+                //                if (mHandler!!.hasMessages(CALL_GO, Integer.valueOf(0))) {
+                //                    mHandler!!.removeMessages(CALL_GO, Integer.valueOf(0))
+                //                    val launch = Intent(this, javaClass<LibraryActivity>())
+                //                    launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                //                    launch.setAction(Intent.ACTION_MAIN)
+                //                    startActivity(launch)
+                //                } else {
+                //                    mHandler!!.sendMessageDelayed(mHandler!!.obtainMessage(CALL_GO, 0, 0, Integer.valueOf(0)), 400)
+                //                }
+            } else if (ACTION_PREVIOUS_SONG == action) {
+                setCurrentSong(-1)
+                userActionTriggered()
+            } else if (ACTION_REWIND_SONG == action) {
+                /* only rewind song IF we played more than 2.5 sec (and song is longer than 5 sec) */
+//                if (getPosition() > REWIND_AFTER_PLAYED_MS && getDuration() > REWIND_AFTER_PLAYED_MS * 2) {
+//                    setCurrentSong(0)
 //                } else {
-//                    mHandler!!.sendMessageDelayed(mHandler!!.obtainMessage(CALL_GO, 0, 0, Integer.valueOf(0)), 400)
+//                    setCurrentSong(-1)
 //                }
+                setCurrentSong(0)
+                play()
+            } else if (ACTION_NEXT_SONG == action) {
+                setCurrentSong(1)
+                userActionTriggered()
+            } else if (ACTION_FF_10S == action) {
+                fastForward10s()
+            } else if (ACTION_CLOSE_NOTIFICATION == action) {
+                mForceNotificationVisible = false
+                pause()
+                stopForeground(true) // sometimes required to clear notification
+                mNotificationManager!!.cancel(NOTIFICATION_ID)
             }
-
         }
 
         return Service.START_NOT_STICKY
+    }
+
+    public fun fastForward10s() {
+        mMediaPlayer!!.seekTo(getPosition() + 10000)
     }
 
     public override fun onDestroy() {
@@ -529,6 +554,22 @@ public class PlaybackService : Service(),
         }
     }
 
+
+    /**
+     * Move to next or previous song or album in the queue.
+
+     * @param delta One of SongTimeline.SHIFT_*.
+     * *
+     * @return The new current song.
+     */
+    public fun shiftCurrentSong(delta: Int): Song? {
+        val song = setCurrentSong(delta)
+        userActionTriggered()
+        return song
+    }
+
+
+
     /**
      * Resets the idle timeout countdown. Should be called by a user action
      * has been triggered (new song chosen or playback toggled).
@@ -595,7 +636,7 @@ public class PlaybackService : Service(),
         views.setOnClickPendingIntent(R.id.play_pause, PendingIntent.getService(this, 0, playPause, 0))
         expanded.setOnClickPendingIntent(R.id.play_pause, PendingIntent.getService(this, 0, playPause, 0))
 
-        val next = Intent(PlaybackService.ACTION_NEXT_SONG)
+        val next = Intent(PlaybackService.ACTION_FF_10S)
         next.setComponent(service)
         views.setOnClickPendingIntent(R.id.next, PendingIntent.getService(this, 0, next, 0))
         expanded.setOnClickPendingIntent(R.id.next, PendingIntent.getService(this, 0, next, 0))
@@ -892,6 +933,10 @@ public class PlaybackService : Service(),
          * Action for startService: advance to the next song.
          */
         public val ACTION_NEXT_SONG: String = "com.namh.jidae.action.NEXT_SONG"
+        /**
+         * Action for fast forward 10s
+         */
+        public val ACTION_FF_10S: String = "com.namh.jidae.action.FF_10S"
         /**
          * Action for startService: advance to the next song.
 

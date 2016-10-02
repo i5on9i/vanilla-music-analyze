@@ -170,9 +170,13 @@ public abstract class PlaybackActivity : Activity(),
         return super<Activity>.onKeyUp(keyCode, event)
     }
 
-//    override fun shiftCurrentSong(delta: Int) {
-//        setSong(PlaybackService.get(this).shiftCurrentSong(delta))
-//    }
+    public fun fastForward10s() {
+        PlaybackService.get(this)!!.fastForward10s()
+    }
+
+    public fun shiftCurrentSong(delta: Int) {
+        setSong(PlaybackService.get(this)!!.shiftCurrentSong(delta))
+    }
 
     public fun playPause() {
         val service = PlaybackService.get(this)
@@ -184,20 +188,21 @@ public abstract class PlaybackActivity : Activity(),
 
     override fun onClick(view: View) {
         when (view.getId()) {
-        //		case R.id.next:
-        //			shiftCurrentSong(SongTimeline.SHIFT_NEXT_SONG);
-        //			break;
+            R.id.next ->
+                // shiftCurrentSong(SongTimeline.SHIFT_NEXT_SONG)
+                fastForward10s()
             R.id.play_pause -> playPause()
-        }//		case R.id.previous:
-        //			shiftCurrentSong(SongTimeline.SHIFT_PREVIOUS_SONG);
-        //			break;
+            R.id.previous -> shiftCurrentSong(SongTimeline.SHIFT_PREVIOUS_SONG)
         //		case R.id.end_action:
         //			cycleFinishAction();
         //			break;
         //		case R.id.shuffle:
         //			cycleShuffle();
         //			break;
+        }
     }
+
+
 
     /**
      * Called when the PlaybackService state has changed.
