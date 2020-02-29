@@ -44,7 +44,7 @@ public class MainActivity : MaterialNavigationDrawer<Any>(),
 
     private fun setAccount() {
         val account = MaterialAccount(this.getResources(),
-                "GTA Tube", "gaedduck@gmail.com",
+                "GTA Tube", "duck@gmail.com",
                 R.drawable.profile, R.drawable.background_header)
 
         this.addAccount(account)
